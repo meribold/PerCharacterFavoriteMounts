@@ -1,0 +1,8 @@
+## Interface: 60000
+## Title: Per Character Favorite Mounts
+## Notes: Makes your favorite mounts character specific.
+## Author: meribold
+## Version: 1.0
+## SavedVariablesPerCharacter: FavoriteMounts
+
+PerCharacterFavoriteMounts.lua
