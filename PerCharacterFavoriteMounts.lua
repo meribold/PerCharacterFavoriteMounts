@@ -12,9 +12,12 @@ end)
 
 function addOn:ADDON_LOADED(name)
   --_G.assert(name == addOnName)
+
   eventHandler:UnregisterEvent("ADDON_LOADED")
+
   _G.FavoriteMounts = _G.FavoriteMounts or {}
   eventHandler:RegisterEvent("PLAYER_LOGIN")
+
   self.ADDON_LOADED = nil
 end
 
@@ -24,10 +27,15 @@ function addOn:PLAYER_LOGIN()
   -- Restore favorite mounts.
   for i = 1, C_MountJournal.GetNumMounts() do
     local isFavorite, canFavorite = C_MountJournal.GetIsFavorite(i)
-    local _, spellID, _, _, _, _, _, _, _, hideOnChar, isCollected = C_MountJournal.GetMountInfo(i)
-    local shouldFavorite = _G.FavoriteMounts[spellID] or false
-    if isFavorite ~= shouldFavorite then
-      C_MountJournal.SetIsFavorite(i, shouldFavorite)
+    if canFavorite then
+      local _, spellID, _, _, _, _, _, _, _, hideOnChar, isCollected = C_MountJournal.GetMountInfo(i)
+      if not hideOnChar then -- Weird things happen when we try to (un)favorite hidden mounts.
+        local shouldFavorite = _G.FavoriteMounts[spellID] or false
+        if isFavorite ~= shouldFavorite then
+          --_G.print(i, spellID, _G.GetSpellInfo(spellID), shouldFavorite)
+          C_MountJournal.SetIsFavorite(i, shouldFavorite)
+        end
+      end
     end
   end
 
