@@ -5,31 +5,12 @@ setfenv(1, addOn)
 
 local C_MountJournal = _G.C_MountJournal
 
-local eventHandler = _G.CreateFrame("Frame")
-eventHandler:SetScript("OnEvent", function(_, event, ...)
-  return addOn[event](addOn, ...)
-end)
-
-function addOn:ADDON_LOADED(name)
-  --_G.assert(name == addOnName)
-
-  eventHandler:UnregisterEvent("ADDON_LOADED")
-
-  _G.FavoriteMounts = _G.FavoriteMounts or {}
-  eventHandler:RegisterEvent("PLAYER_LOGIN")
-
-  self.ADDON_LOADED = nil
-end
-
-function addOn:PLAYER_LOGIN()
-  --_G.assert(C_MountJournal)
-
-  -- Restore favorite mounts.
+function restoreFavoriteMounts()
   for i = 1, C_MountJournal.GetNumMounts() do
     local isFavorite, canFavorite = C_MountJournal.GetIsFavorite(i)
     if canFavorite then
       local _, spellID, _, _, _, _, _, _, _, hideOnChar, isCollected = C_MountJournal.GetMountInfo(i)
-      if not hideOnChar then -- Weird things happen when we try to (un)favorite hidden mounts.
+      if not hideOnChar and isCollected then -- Weird things happen when we try to (un)favorite hidden mounts.
         local shouldFavorite = _G.FavoriteMounts[spellID] or false
         if isFavorite ~= shouldFavorite then
           --_G.print(i, spellID, _G.GetSpellInfo(spellID), shouldFavorite)
@@ -38,6 +19,29 @@ function addOn:PLAYER_LOGIN()
       end
     end
   end
+end
+
+local eventHandler = _G.CreateFrame("Frame")
+eventHandler:SetScript("OnEvent", function(_, event, ...)
+  return addOn[event](addOn, ...)
+end)
+
+function addOn:ADDON_LOADED(name)
+  if name ~= addOnName then return end
+
+  eventHandler:UnregisterEvent("ADDON_LOADED")
+
+  _G.FavoriteMounts = _G.FavoriteMounts or {}
+  eventHandler:RegisterEvent("PLAYER_ENTERING_WORLD")
+
+  self.ADDON_LOADED = nil
+end
+
+function addOn:PLAYER_ENTERING_WORLD()
+  --_G.assert(C_MountJournal)
+  eventHandler:UnregisterEvent("PLAYER_ENTERING_WORLD")
+
+  restoreFavoriteMounts()
 
   -- Save favorite mounts as they are added.
   _G.hooksecurefunc(C_MountJournal, "SetIsFavorite", function(index, value)
@@ -46,7 +50,7 @@ function addOn:PLAYER_LOGIN()
     _G.FavoriteMounts[spellID] = value or nil -- Assign nil (remove the key) when value == false.
   end)
 
-  self.PLAYER_LOGIN = nil
+  self.PLAYER_ENTERING_WORLD = nil
 end
 
 eventHandler:RegisterEvent("ADDON_LOADED")
