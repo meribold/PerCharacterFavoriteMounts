@@ -45,13 +45,13 @@ function restoreFavoriteMounts()
     if canFavorite then
       -- local creatureName, spellId, _, _, _, _, reallyIsFav, _, _, hideOnChar, isCollected = GetMountInfoByID(mountId)
       local creatureName, spellId, _, _, _, _, reallyIsFav, _, _, hideOnChar, isCollected = GetDisplayedMountInfo(i)
-      _G.assert(isFav == reallyIsFav)
+      -- _G.assert(isFav == reallyIsFav)
       if spellId and not hideOnChar and isCollected then -- Weird things happen when we try to (un)favorite hidden mounts.
         local shouldFavorite = _G.FavoriteMounts[spellId] or false
         if isFav ~= shouldFavorite then
           C_MountJournal.SetIsFavorite(i, shouldFavorite)
           -- Removing a favorite changes what mount is displayed at the current index: use the same value of i again.
-          if shouldFavorite then i = i - 1 end
+          if not shouldFavorite then i = i - 1 end
           --[[
           if shouldFavorite then
             print("Favoriting \"" .. creatureName .. "\" (" .. spellId .. ")")
