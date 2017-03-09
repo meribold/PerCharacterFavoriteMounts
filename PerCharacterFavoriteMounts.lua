@@ -107,7 +107,18 @@ function addon:PLAYER_ENTERING_WORLD()
   C_MountJournal.SetCollectedFilterSetting(_G.LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
   C_MountJournal.SetCollectedFilterSetting(_G.LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
   eventHandler:UnregisterEvent("PLAYER_ENTERING_WORLD")
-  restoreFavoriteMounts()
+   
+  
+	-- TODO: Right now, this just uses the mounts of the last loaded character, which might be bad
+	-- Make the addon save your list of mounts for all characters when it's first loaded
+	print("First load on this character, saving your global favourite mounts.")
+	_G.FavoriteMounts["__init_done"] = true
+	updateFavorites()
+	hookSetIsFavorite()
+  else
+	restoreFavoriteMounts()
+  end
+  
   self.PLAYER_ENTERING_WORLD = nil
 end
 
