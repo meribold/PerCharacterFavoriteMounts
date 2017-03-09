@@ -29,7 +29,7 @@ end
 function hookSetIsFavorite()
   -- Save favorite mounts as they are added.
   _G.hooksecurefunc(C_MountJournal, "SetIsFavorite", function(index, value)
-    -- print("SetIsFavorite(" .. index .. ", " .. _G.tostring(value) .. ")")
+    --print("SetIsFavorite(" .. index .. ", " .. _G.tostring(value) .. ")")
     updateFavorites()
   end)
 end
@@ -52,13 +52,11 @@ function restoreFavoriteMounts()
           C_MountJournal.SetIsFavorite(i, shouldFavorite)
           -- Removing a favorite changes what mount is displayed at the current index: use the same value of i again.
           if not shouldFavorite then i = i - 1 end
-          --[[
           if shouldFavorite then
-            print("Favoriting \"" .. creatureName .. "\" (" .. spellId .. ")")
+            --print("Favoriting \"" .. creatureName .. "\" (" .. spellId .. ")")
           else
-            print("Unfavoriting \"" .. creatureName .. "\" (" .. spellId .. ")")
+            --print("Unfavoriting \"" .. creatureName .. "\" (" .. spellId .. ")")
           end
-          --]]
         end
       end
     end
@@ -107,7 +105,20 @@ function addon:PLAYER_ENTERING_WORLD()
   C_MountJournal.SetCollectedFilterSetting(_G.LE_MOUNT_JOURNAL_FILTER_COLLECTED, true)
   C_MountJournal.SetCollectedFilterSetting(_G.LE_MOUNT_JOURNAL_FILTER_NOT_COLLECTED, true)
   eventHandler:UnregisterEvent("PLAYER_ENTERING_WORLD")
-  restoreFavoriteMounts()
+  
+  local old_favourites_saved = _G.FavoriteMounts["__init_done"]
+  
+  if old_favourites_saved == nil then
+	-- TODO: Right now, this just uses the mounts of the last loaded character, which might be bad
+	-- Make the addon save your list of mounts for all characters when it's first loaded
+	print("First load on this character, saving your global favourite mounts.")
+	_G.FavoriteMounts["__init_done"] = true
+	updateFavorites()
+	hookSetIsFavorite()
+  else
+	restoreFavoriteMounts()
+  end
+  
   self.PLAYER_ENTERING_WORLD = nil
 end
 
